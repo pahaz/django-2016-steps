@@ -4,6 +4,7 @@ from invoke import run, task
 
 from _project_.settings import DATA_DIR, STATIC_ROOT, MEDIA_ROOT, VENV_DIR
 
+
 @task
 def init():
     mkdir(DATA_DIR)
@@ -12,10 +13,21 @@ def init():
     mkvenv(VENV_DIR, version='3.5')
     run(venv_activate_wrap('pip install -r requirements.txt', VENV_DIR))
 
+
 @task
 def runserver():
-    run(venv_activate_wrap('python manage.py runserver', VENV_DIR), echo=True,
-        pty=True)
+    kwargs = {'echo': True}
+    if os.name != 'nt':
+        kwargs['pty'] = True
+    run(venv_activate_wrap('python manage.py runserver', VENV_DIR), **kwargs)
+
+
+@task
+def r(cmd):
+    kwargs = {'echo': True}
+    if os.name != 'nt':
+        kwargs['pty'] = True
+    run(venv_activate_wrap(cmd, VENV_DIR))
 
 
 def mkdir(path):

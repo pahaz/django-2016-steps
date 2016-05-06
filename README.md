@@ -7,3 +7,8 @@
 
     # initialization
     invoke init
+
+
+# init db
+
+    invoke r "python manage.py migrate"
