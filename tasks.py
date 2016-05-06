@@ -12,6 +12,11 @@ def init():
     mkvenv(VENV_DIR, version='3.5')
     run(venv_activate_wrap('pip install -r requirements.txt', VENV_DIR))
 
+@task
+def runserver():
+    run(venv_activate_wrap('python manage.py runserver', VENV_DIR), echo=True,
+        pty=True)
+
 
 def mkdir(path):
     if not os.path.exists(path):

@@ -7,4 +7,3 @@
 
     # initialization
     invoke init
-
