@@ -1,0 +1,13 @@
+Django==1.9.4
+django-debug-toolbar==1.4
+django-widget-tweaks==1.4.1
+django-extensions
+
+Jinja2==2.8
+
+# tests
+factory-boy>=2.5.2
+fake-factory>=0.5.7
+coverage
+prospector
+pytest
