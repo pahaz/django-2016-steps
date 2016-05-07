@@ -42,3 +42,4 @@
  - show `python manage.py runserver_plus`
  - add static file `_project_/static/robots.txt`, change settings `STATICFILES_DIRS`; tell about how django serve static files, `'django.contrib.staticfiles'`
  - show django admin interface; tell about `User`, `Group`, and `Permission` models; overview of `INSTALLED_APPS`
+ - `startapp` and include urls.py
