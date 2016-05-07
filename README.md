@@ -5,7 +5,7 @@
  - `run.sh` - run command in virtualenv (helper)
  - `tasks.py` - invoke file
 
-# Init new project
+# Workflow
 
     # prepare
     pip install invoke
@@ -15,15 +15,15 @@
     # initialization
     invoke init
 
-
-# Init db
-
+    # init db
     invoke migrate
     ./run.sh python manage.py createsuperuser
 
-# Create app
-
+    # create app
     ./run.sh python manage.py startapp <name>
+
+    # runserver
+    invoke runserver
 
 # STEPS #
 
