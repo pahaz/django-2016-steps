@@ -1,3 +1,10 @@
+# FILES
+
+ - `_project_` - django project directory
+ - `__data__` - db, media, and collected static files directory
+ - `run.sh` - run command in virtualenv (helper)
+ - `tasks.py` - invoke file
+
 # Init new project
 
     # prepare
@@ -9,6 +16,11 @@
     invoke init
 
 
-# init db
+# Init db
 
-    invoke r "python manage.py migrate"
+    invoke migrate
+    ./run.sh python manage.py createsuperuser
+
+# Create app
+
+    ./run.sh python manage.py startapp <name>

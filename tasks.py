@@ -11,23 +11,25 @@ def init():
     mkdir(STATIC_ROOT)
     mkdir(MEDIA_ROOT)
     mkvenv(VENV_DIR, version='3.5')
-    run(venv_activate_wrap('pip install -r requirements.txt', VENV_DIR))
+    run_in_venv('pip install -r requirements.txt')
 
 
 @task
 def runserver():
-    kwargs = {'echo': True}
-    if os.name != 'nt':
-        kwargs['pty'] = True
-    run(venv_activate_wrap('python manage.py runserver', VENV_DIR), **kwargs)
+    run_in_venv('python manage.py runserver')
 
 
 @task
-def r(cmd):
+def migrate():
+    run_in_venv('python manage.py migrate -v1')
+
+
+@task
+def run_in_venv(command):
     kwargs = {'echo': True}
     if os.name != 'nt':
         kwargs['pty'] = True
-    run(venv_activate_wrap(cmd, VENV_DIR))
+    run(venv_activate_wrap(command, VENV_DIR), **kwargs)
 
 
 def mkdir(path):
