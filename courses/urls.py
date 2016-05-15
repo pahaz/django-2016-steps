@@ -1,3 +1,4 @@
+from courses.views import run_code
 from django.conf.urls import url
 from django.shortcuts import render
 
@@ -9,5 +10,5 @@ def index(request):
 
 
 urlpatterns = [
-    url(r'^$', index),
+    url(r'^$', run_code),
 ]
