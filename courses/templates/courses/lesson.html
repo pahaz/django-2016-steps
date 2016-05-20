@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<body>
+<div>{{ lesson.title }}</div>
+{% for step in lesson.steps.all %}
+    <div>{{ step.render|safe }}</div>
+{% endfor %}
+</body>

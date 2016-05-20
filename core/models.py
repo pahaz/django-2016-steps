@@ -9,8 +9,8 @@ class Titled(models.Model):
 
 
 class Dated(models.Model):
-    created = models.DateTimeField(auto_created=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(editable=False, auto_now_add=True)
+    updated = models.DateTimeField(editable=False, auto_now=True)
 
     class Meta:
         abstract = True

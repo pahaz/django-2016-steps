@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<body>
+{% for lesson in lessons %}
+    <div><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></div>
+{% endfor %}
+</body>

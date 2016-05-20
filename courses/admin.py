@@ -1,3 +1,5 @@
+from courses.models import Lesson, Step
 from django.contrib import admin
 
-# Register your models here.
+admin.site.register(Step)
+admin.site.register(Lesson)
