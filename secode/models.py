@@ -10,10 +10,12 @@ from core.models import Dated, Titled
 class CodeCheckList(Dated, Titled):
 
     def check_all_attr(self, ucode):
-        for one_check in self.code_check_set.all():
-            if not one_check.check(ucode):
-                return False
-        return True
+        if self.checks.all():
+            for one_check in self.checks.all():
+                if not one_check.check_attr(ucode):
+                    return False
+            return True
+        return False
 
     def __str__(self):
         return '{1}-{0}'.format(self.pk, self.title)
@@ -21,15 +23,16 @@ class CodeCheckList(Dated, Titled):
 
 class CodeCheck(Titled):
     codechecklist = models.ForeignKey(CodeCheckList, related_name='checks')
-    attribute = models.CharField(max_length=256)
+    attribute = models.CharField(max_length=256, default='')
     ttl = models.IntegerField(default=15)
     check_regex = models.BinaryField(default=b'(.*)')
 
     def check_attr(self, ucode):
-        regex = re.compile(self.check_regex)
+        regex = re.compile(self.check_regex, re.M)
         try:
             with tempfile.NamedTemporaryFile() as temp:
                 temp.write(ucode.strip().encode())
+                temp.flush()
                 command = ['python', temp.name]
                 command.extend(self.attribute.split())
                 output = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=self.ttl)
@@ -51,9 +54,9 @@ class Code(Dated):
     def check_code(self):
         if self.codechecklist.check_all_attr(self.code):
             self.error = False
-            return self.error
+            return True
         self.error = True
-        return self.error
+        return False
 
     def __str__(self):
         return 'Code-{0}-{1}'.format(self.pk, self.codechecklist.title)
