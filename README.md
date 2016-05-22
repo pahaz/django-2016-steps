@@ -30,6 +30,6 @@
 
  - /poll/
 
-# code
+# secode
 
- - /code/
+ - /secode/
