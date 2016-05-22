@@ -1,3 +1,140 @@
 from django.test import TestCase
 
-# Create your tests here.
+from secode.models import CodeCheckList, CodeCheck, Code
+
+
+class ModelsTests(TestCase):
+
+    def test_code_check_list(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', codechecklist=ccl)
+        cc_2 = CodeCheck(title='Attr2', codechecklist=ccl)
+        cc_1.save()
+        cc_2.save()
+        self.assertEqual(ccl.checks.count(), 2)
+
+    def test_run_good_python_script(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1',check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        self.assertEqual(ccl.checks.count(), 1)
+        c = Code(code='print("SUCCESS")', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertTrue(c.check_code())
+
+    def test_run_bad_python_script(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        self.assertEqual(ccl.checks.count(), 1)
+        c = Code(code='print("BAD")', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertFalse(c.check_code())
+
+    def test_run_good_python_script_with_two_checkers(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        cc_2 = CodeCheck(title='Attr2', check_regex=b'.*(SUSU).*', codechecklist=ccl)
+        cc_2.save()
+        self.assertEqual(ccl.checks.count(), 2)
+        c = Code(code='print("SUSUCCESS")', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertTrue(c.check_code())
+
+    def test_run_bad_python_script_with_two_checkers(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        cc_2 = CodeCheck(title='Attr2', check_regex=b'.*(SUSU).*', codechecklist=ccl)
+        cc_2.save()
+        self.assertEqual(ccl.checks.count(), 2)
+        c = Code(code='print("SUCCESS")', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertFalse(c.check_code())
+
+    def test_run_good_python_script_with_one_arg(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', attribute='SUCCESS', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        self.assertEqual(ccl.checks.count(), 1)
+        c = Code(code='import sys\nprint(sys.argv[-1])', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertTrue(c.check_code())
+
+    def test_run_bad_python_script_with_one_arg(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', attribute='BAD', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        self.assertEqual(ccl.checks.count(), 1)
+        c = Code(code='import sys\nprint(sys.argv[-1])', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertFalse(c.check_code())
+
+    def test_run_good_python_script_with_one_arg_with_two_checkers(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', attribute='SUCCESS', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        cc_2 = CodeCheck(title='Attr2', attribute='SUSU', check_regex=b'.*(SUSU).*', codechecklist=ccl)
+        cc_2.save()
+        self.assertEqual(ccl.checks.count(), 2)
+        c = Code(code='import sys\nprint(sys.argv[-1])', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertTrue(c.check_code())
+
+    def test_run_bad_python_script_with_one_arg_with_two_checkers(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        cc_1 = CodeCheck(title='Attr1', attribute='SUCCESS', check_regex=b'.*(SUCCESS).*', codechecklist=ccl)
+        cc_1.save()
+        cc_2 = CodeCheck(title='Attr2', attribute='BAD', check_regex=b'.*(SUSU).*', codechecklist=ccl)
+        cc_2.save()
+        self.assertEqual(ccl.checks.count(), 2)
+        c = Code(code='import sys\nprint(sys.argv[-1])', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertFalse(c.check_code())
+
+    def test_no_run_python_script_without_checkers(self):
+        ccl = CodeCheckList(title='List')
+        ccl.save()
+        self.assertEqual(CodeCheckList.objects.count(), 1)
+        self.assertEqual(CodeCheckList.objects.all()[0].title, 'List')
+        self.assertEqual(ccl.checks.count(), 0)
+        c = Code(code='print("BAD")', codechecklist=ccl)
+        c.save()
+        self.assertEqual(ccl.codes.count(), 1)
+        self.assertFalse(c.check_code())
