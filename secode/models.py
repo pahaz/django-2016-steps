@@ -30,6 +30,8 @@ class CodeCheck(Titled):
     def check_attr(self, ucode):
         regex = re.compile(self.check_regex, re.M)
         try:
+            # For safe start, we can create special user,
+            # which can work only at special directory and run script with 'su thisusername'
             with tempfile.NamedTemporaryFile() as temp:
                 temp.write(ucode.strip().encode())
                 temp.flush()
