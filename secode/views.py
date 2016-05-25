@@ -1,7 +1,15 @@
 from django.http import JsonResponse
-
+from django.middleware.csrf import get_token
 
 from secode.models import CodeCheckList, CodeCheck, Code
+
+
+def get_csrf_token(request):
+    answer = {
+        'status': 'OK',
+        'csrftoken': get_token(request)
+    }
+    return JsonResponse(answer)
 
 
 def create_list(request):
