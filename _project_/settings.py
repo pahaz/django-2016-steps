@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'courses',
+    'secode',
 ]
 
 MIDDLEWARE_CLASSES = [
