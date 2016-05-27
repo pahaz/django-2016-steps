@@ -4,103 +4,80 @@ from django.middleware.csrf import get_token
 from secode.models import CodeCheckList, CodeCheck, Code
 
 
-def get_csrf_token(request):
-    answer = {
-        'status': 'OK',
-        'csrftoken': get_token(request)
-    }
-    return JsonResponse(answer)
+class JsonView:
+    def __init__(self, methods=('GET', 'POST')):
+        if type(methods) in (list, tuple):
+            self.methods = tuple(methods)
+        else:
+            self.methods = (methods,)
 
-
-def create_list(request):
-    if request.method == 'POST':
+    def __call__(self, request, *args, **kwargs):
+        answer = {}
         try:
-            title = request.POST['title']
-            ccl = CodeCheckList(title=title)
-            ccl.save()
-            answer = {
-                'status': 'OK',
-                'object': dict(title=ccl.title, id=ccl.id, date=ccl.created)
-            }
-            return JsonResponse(answer)
-        except KeyError:
-            pass
-    answer = {
-        'status': 'FAIL'
-    }
-    return JsonResponse(answer)
+            if request.method not in self.methods:
+                raise Exception('No support method')
+            ans = self.handler(request, *args, **kwargs)
+            if ans:
+                answer['answer'] = ans
+                answer['status'] = 'OK'
+            else:
+                raise Exception('No answer')
+        except NotImplementedError:
+            raise
+        except Exception:
+            answer['status'] = 'FAIL'
+        return JsonResponse(answer)
+
+    def handler(self, request):
+        raise NotImplementedError('Not implemented')
 
 
-def delete_list(request):
-    if request.method == 'POST':
-        try:
-            CodeCheckList.objects.filter(pk=request.POST['id']).delete()
-            answer = {
-                'status': 'OK'
-            }
-            return JsonResponse(answer)
-        except KeyError:
-            pass
-    answer = {
-        'status': 'FAIL'
-    }
-    return JsonResponse(answer)
+class GetCsrfToken(JsonView):
+    def handler(self, request):
+        return {'csrfmiddlewaretoken': get_token(request),
+                'tips:': 'csrfmiddlewaretoken - key for data; csrftoken - key for cookies'}
 
 
-def add_check_to_list(request):
-    if request.method == 'POST':
-        try:
-            lista = CodeCheckList.objects.filter(pk=request.POST['id'])
-            title = request.POST['title']
-            ttl = request.POST['ttl']
-            attribute = request.POST['attr']
-            check_regex = request.POST['regex'].encode()
-            cc = CodeCheck(codechecklist=lista, title=title, ttl=ttl, attribute=attribute, check_regex=check_regex)
-            cc.save()
-            answer = {
-                'status': 'OK',
-                'object': {'list_id': request.POST['id'], 'check_id': cc.id, 'title': title, 'ttl': ttl,
-                           'attribute': attribute, 'regex': check_regex.decode()}
-            }
-        except KeyError:
-            pass
-    answer = {
-        'status': 'FAIL'
-    }
-    return JsonResponse(answer)
+class CreateList(JsonView):
+    def handler(self, request):
+        ccl = CodeCheckList(title=request.POST['title'])
+        ccl.save()
+        return {'title': ccl.title, 'id': ccl.id, 'date': ccl.created}
 
 
-def delete_check_from_list(request):
-    if request.method == 'POST':
-        try:
-            CodeCheckList.objects.filter(pk=request.POST['list_id']).checks.filter(pk=request.POST['check_id']).delete()
-            answer = {
-                'status': 'OK'
-            }
-            return JsonResponse(answer)
-        except KeyError:
-            pass
-    answer = {
-        'status': 'FAIL'
-    }
-    return JsonResponse(answer)
+class DeleteList(JsonView):
+    def handler(self, request):
+        ccl = CodeCheckList.objects.get(pk=request.POST['id'])
+        title = ccl.title
+        ccl.delete()
+        return {'title': title, 'delete': 'OK'}
 
 
-def add_and_check_code(request):
-    if request.method == 'POST':
-        try:
-            ids = request.POST['id']
-            code = request.POST['code']
-            c = Code(codechecklist=CodeCheckList.objects.filter(pk=ids), code=code)
-            c.save()
-            answer = {
-                'status': 'OK',
-                'object': {'list_id': request.POST['id'], 'code_id': c.id, 'error': c.error, 'check': c.check_code()}
-            }
-            return JsonResponse(answer)
-        except KeyError:
-            pass
-    answer = {
-        'status': 'FAIL'
-    }
-    return JsonResponse(answer)
+class CreateCheckToList(JsonView):
+    def handler(self, request):
+        ccl = CodeCheckList.objects.get(pk=request.POST['id'])
+        cc = CodeCheck(
+            codechecklist=ccl,
+            title=request.POST['title'],
+            ttl=request.POST['ttl'],
+            attribute=request.POST['attributes'],
+            check_regex=request.POST['regex'].encode()
+        )
+        cc.save()
+        return dict(list_id=request.POST['id'], check_id=cc.id, title=cc.title, ttl=cc.ttl, attributes=cc.attribute,
+                    regex=cc.check_regex.decode())
+
+
+class DeleteCheckFromList(JsonView):
+    def handler(self, request):
+        cc = CodeCheckList.objects.get(pk=request.POST['list_id']).checks.get(pk=request.POST['check_id'])
+        title = cc.title
+        cc.delete()
+        return {'title': title, 'delete': 'OK'}
+
+
+class CreateCodeAndCheck(JsonView):
+    def handler(self, request):
+        c = Code(codechecklist=CodeCheckList.objects.get(pk=request.POST['id']), code=request.POST['code'])
+        c.save()
+        return {'list_id': request.POST['id'], 'code_id': c.id, 'error': c.error, 'check': c.check_code()}
