@@ -1,9 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block meta_title %}{% endblock %}</title>
-</head>
+<html lang="ru">
+{% load i18n future staticfiles %}
+    <head>
+        <meta charset="utf-8">
+        <title>{% block meta_title %}{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {% block css %}
+            <link rel="shortcut icon" href="{% static "img/favicon.ico" %} " type="image/x-icon" />
+            {% block extra_css %}{% endblock %}
+        {% endblock %}
+
+        {% block js %}
+            {% block extra_js %}{% endblock %}
+        {% endblock %}
+
+        {% block extra_head %}{% endblock %}
+    </head>
 <body>
 {% block content %}{% endblock %}
 </body>
